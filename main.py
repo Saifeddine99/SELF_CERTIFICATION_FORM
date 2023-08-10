@@ -4,11 +4,13 @@ from streamlit_option_menu import option_menu
 import PIL as pillow
 from PIL import Image
 
+import os
+
 from clinical_data import clinical
 from demographic_data import demographic
 from self_certification import self_certif
 
-page_icon_img=Image.open("images\Sick-employees.jpeg")
+page_icon_img=Image.open(os.path.join("images","Sick-employees.jpeg"))
 
 
 #this function allows to add the page title and icon
@@ -45,7 +47,7 @@ if selected=="Home page":
     unsafe_allow_html = True
     )
 
-    home_image=Image.open('images\My project.png')
+    home_image=Image.open(os.path.join("images","My project.png"))
     st.image(home_image)
     st.write('#')
 
@@ -54,7 +56,7 @@ if selected=="Home page":
         
         st.write('#')
         st.subheader('1/You can click on "Demographic data" button in "Main menu" to submit your demographic data and receive it in an OpenEHR standards format ".JSON" file')
-    demographic_icon=Image.open("images\demographics.png")
+    demographic_icon=Image.open(os.path.join("images","demographics.png"))
     with anim:
         st.image(demographic_icon, width=300)
 
@@ -67,7 +69,7 @@ if selected=="Home page":
         st.write('#')
         
         st.subheader('2/You can click on "Clinical data" button in "Main menu" to submit your clinical data and receive it in an OpenEHR standards format ".JSON" file')
-    clinical_image=Image.open("images\clinical_report.png")
+    clinical_image=Image.open(os.path.join("images","clinical_report.png"))
     with anim:
         st.write('#')
         st.image(clinical_image, width=300)
