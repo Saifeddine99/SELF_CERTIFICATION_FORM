@@ -1,7 +1,7 @@
 import streamlit as st 
 from streamlit_option_menu import option_menu
 
-import PIL as pillow
+#import PIL as pillow
 from PIL import Image
 
 import os
@@ -52,17 +52,17 @@ if selected=="Home page":
     st.write('#')
 
     text, anim = st.columns((2, 1))
+
+    #The below code is related to demographic data stuff
     with text:
         
         st.write('#')
         st.subheader('1/You can click on "Demographic data" button in "Main menu" to submit your demographic data and receive it in an OpenEHR standards format ".JSON" file')
     demographic_icon=Image.open(os.path.join("images","demographics.png"))
     with anim:
-        st.image(demographic_icon, width=300)
+        st.image(demographic_icon, width=250)
 
-    st.write('#')
-    st.write('#')
-    st.write('#')
+    #The below code is related to clinical data stuff
     with text:
         st.write('#')
         st.write('#')
@@ -72,7 +72,9 @@ if selected=="Home page":
     clinical_image=Image.open(os.path.join("images","clinical_report.png"))
     with anim:
         st.write('#')
-        st.image(clinical_image, width=300)
+        st.write('#')
+        st.write('#')
+        st.image(clinical_image, width=250)
 
 
 if selected=="Demographic data":
