@@ -1,6 +1,7 @@
 import streamlit as st 
 from streamlit_option_menu import option_menu
 
+import PIL as pillow
 from PIL import Image
 
 from clinical_data import clinical
