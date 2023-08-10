@@ -68,12 +68,10 @@ if selected=="Home page":
         st.write('#')
         st.write('#')
         st.write('#')
-        st.write('#')
         
         st.subheader('2/You can click on "Clinical data" button in "Main menu" to submit your clinical data and receive it in an OpenEHR standards format ".JSON" file')
     clinical_image=Image.open(os.path.join("images","clinical_report.png"))
     with anim:
-        st.write('#')
         st.write('#')
         st.write('#')
         st.image(clinical_image, width=250)
