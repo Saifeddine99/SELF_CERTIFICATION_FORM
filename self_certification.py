@@ -1,51 +1,24 @@
 import streamlit as st
-
-from reportlab.lib.pagesizes import letter
-from reportlab.pdfgen import canvas
-from reportlab.lib import colors
-from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
-from reportlab.platypus import Paragraph
-from io import BytesIO
-
 import json
+
+import os
+import data_dictionary
+
+import fillpdf
+from fillpdf import fillpdfs
+
+import base64
+from pathlib import Path
+
+
+#----------------------------------------------------------------------------------------------------------------
 
 # This function turns the "done_button" state_session to True (Take a look on st.state_session if you are not familiar with it)
 def callback():
     #Button was clicked!
     st.session_state.done_button= True
 
-def generate_pdf(data):
-    buffer = BytesIO()
-    c = canvas.Canvas(buffer, pagesize=letter)
-
-    # Add a rectangle for header
-    c.setFillColor(colors.blue)
-    c.rect(0, 750, letter[0], 50, fill=True)
-
-    # Set font and size for header text
-    c.setFont("Helvetica-Bold", 16)
-    c.setFillColor(colors.white)
-    c.drawString(100, 760, "Generated PDF with Design")
-
-    # Set font and size for content
-    c.setFont("Helvetica", 12)
-
-    # Add submitted data
-    c.drawString(100, 700, "Submitted Data:")
-    c.drawString(100, 680, f"Name: {data['name']}")
-    c.drawString(100, 660, f"Email: {data['email']}")
-
-    # Add more data fields as needed
-
-    # Add a styled paragraph
-    style = getSampleStyleSheet()["Normal"]
-    p = Paragraph("This is a sample paragraph with <b>bold</b> and <font color='red'>colored</font> text.", style)
-    p.wrapOn(c, 400, 100)
-    p.drawOn(c, 100, 620)
-
-    c.save()
-    buffer.seek(0)
-    return buffer
+#----------------------------------------------------------------------------------------------------------------
 
 def self_certif():
 
@@ -80,7 +53,7 @@ def self_certif():
         #Getting clinical data:
         clinical_data = json.load(clinical_json_file)
         try:
-            problem_diagnosis_name,clinical_description,date_of_onset,date_clinically_recognised,last_date_of_work,end_of_shift_time,sickness,date_of_resolution=clinical_data_extractor(clinical_data)
+            problem_diagnosis_name,clinical_description,date_of_sickness_beginning,date_clinically_recognised,last_date_of_work,time_of_finishing_work,sickness,date_of_resolution=clinical_data_extractor(clinical_data)
         except:
             error_clinical=1
             st.error(": This is not the requested clinical data file",icon="❌")
@@ -93,19 +66,42 @@ def self_certif():
             error_demographics=1
             st.error(": This is not the requested demographic data file",icon="❌")
 
-
+        
         if(error_clinical==0 and error_demographics==0):
-            st.write("here comes the big stuff")
-            submitted_data = {
-                "name": name,
-                "email": email,
-                # Add more fields here
-            }
-            if st.button("Generate PDF"):
-                pdf_buffer = generate_pdf(submitted_data)
-                st.download_button("Download PDF", pdf_buffer.getvalue(), "generated_pdf.pdf")
             
+            # Define field values
+            field_values = data_dictionary.data_dict
 
+            # Input PDF file and output flattened PDF file
+            input_pdf_path = 'self-certificate-form-editable.pdf'
+
+            output_pdf_path ='filled_form_flattened.pdf'
+
+            fillpdfs.write_fillable_pdf(input_pdf_path, output_pdf_path, field_values,flatten=True)
+
+            with open(output_pdf_path, "rb") as file:
+                pdf_contents = file.read()
+            
+            # Display the PDF content
+            st.write("PDF Preview:")
+            pdf_path = Path(output_pdf_path)
+            base64_pdf = base64.b64encode(pdf_path.read_bytes()).decode("utf-8")
+            pdf_display = f"""
+                <iframe src="data:application/pdf;base64,{base64_pdf}" width="800px" height="2100px" type="application/pdf"></iframe>
+            """
+            st.markdown(pdf_display, unsafe_allow_html=True)
+
+            col1, col2, col3 = st.columns([4,2,3])
+            with col2:
+                #This is a download button that allows to download the created new treatment file 
+                download_button = st.download_button('Download', data=pdf_contents, file_name="filled_form_flattened.pdf")
+            
+            if (download_button):
+                st.write("#")
+                st.success(": File saved well" ,icon="✅")
+            
+            
+            
     elif ((clinical_json_file is not None) and (demographic_json_file is None)):
         st.warning(": Waiting for the demographic data",icon="⚠️")
 
@@ -116,22 +112,22 @@ def self_certif():
         st.warning(": Waiting for both: demographic & clinical data",icon="⚠️")
 
 
-    return()
-
+#---------------------------------------------------------------------------------------------------------------
 
 def clinical_data_extractor(json_object_clinical_data):
 
     problem_diagnosis_name=json_object_clinical_data["content"][0]["data"]["items"][0]["value"]["value"]
     clinical_description=json_object_clinical_data["content"][0]["data"]["items"][1]["value"]["value"]
-    date_of_onset=json_object_clinical_data["content"][0]["data"]["items"][2]["value"]["value"]
+    date_of_sickness_beginning=json_object_clinical_data["content"][0]["data"]["items"][2]["value"]["value"] #What date did your sickness begin? 
     date_clinically_recognised=json_object_clinical_data["content"][0]["data"]["items"][3]["value"]["value"]
     last_date_of_work=json_object_clinical_data["content"][0]["data"]["items"][4]["value"]["value"]
-    end_of_shift_time=json_object_clinical_data["content"][0]["data"]["items"][5]["value"]["value"]
+    time_of_finishing_work=json_object_clinical_data["content"][0]["data"]["items"][5]["value"]["value"]
     sickness=json_object_clinical_data["content"][0]["data"]["items"][6]["value"]["symbol"]["value"]
     date_of_resolution=json_object_clinical_data["content"][0]["data"]["items"][7]["value"]["value"]
 
-    return(problem_diagnosis_name,clinical_description,date_of_onset,date_clinically_recognised,last_date_of_work,end_of_shift_time,sickness,date_of_resolution)
+    return(problem_diagnosis_name,clinical_description,date_of_sickness_beginning,date_clinically_recognised,last_date_of_work,time_of_finishing_work,sickness,date_of_resolution)
 
+#------------------------------------------------------------------------------------------------------------------
 
 def demographical_data_extractor(json_object_demographic_data):
 
@@ -155,3 +151,4 @@ def demographical_data_extractor(json_object_demographic_data):
 
     country=json_object_demographic_data["contacts"][0]["addresses"][0]["details"]["items"][5]["value"]["value"]
     return(street_name,street_number,postal_code,province,town,country,email,phone_number,country_code,name,surname,title,birthday,marital_status,status,national_insurance,clock_payroll)
+

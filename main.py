@@ -6,7 +6,7 @@ from PIL import Image
 
 import os
 
-from clinical_data import clinical
+from clinical_data import clinical 
 from demographic_data import demographic
 from self_certification import self_certif
 
