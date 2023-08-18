@@ -58,7 +58,7 @@ def self_certif():
         #Geting demographic data:
         demographic_data = json.load(demographic_json_file)
         try:
-            street_name,street_number,postal_code,province,town,country,email,phone_number,country_code,name,surname,title,birthday,marital_status,status,national_insurance,clock_payroll=demographical_data_extractor(demographic_data)
+            street_name,street_number,postal_code,province,town,country,email,phone_number,country_code,first_name,surname,title,birthday,marital_status,status,national_insurance,clock_payroll=demographical_data_extractor(demographic_data)
         except:
             error_demographics=1
             st.error(": This is not the requested demographic data file",icon="❌")
@@ -67,7 +67,7 @@ def self_certif():
         if(error_clinical==0 and error_demographics==0):
             
             # Define field values
-            field_values = data_dictionary.data_dict
+            field_values = fill_form_with_data(first_name, surname, problem_diagnosis_name, clinical_description, title)
 
             # Input PDF file and output flattened PDF file
             input_pdf_path = 'self-certificate-form-editable.pdf'
@@ -101,6 +101,18 @@ def self_certif():
     else:
         st.warning(": Waiting for both: demographic & clinical data",icon="⚠️")
 
+#---------------------------------------------------------------------------------------------------------------
+
+def fill_form_with_data(first_name, surname, problem_diagnosis_name, clinical_description, title):
+
+    data=data_dictionary.data_dict
+    data["Text2"]=surname
+    data["Text3"]=first_name
+    data["Text4"]=title
+    data["Text9"]=problem_diagnosis_name
+    data["Text8"]=clinical_description
+
+    return(data)
 
 #---------------------------------------------------------------------------------------------------------------
 
@@ -116,14 +128,7 @@ def convert_pdf_to_images(output_pdf_path):
     with colc:
         st.image(image2, caption='Second page', use_column_width=True)
 
-    for image in images:
-        image.save('output'+str(x)+".png","PNG")
-        x=x+1
-    
-
-
-    return()
-
+    st.write("#")
 #---------------------------------------------------------------------------------------------------------------
 
 def clinical_data_extractor(json_object_clinical_data):
