@@ -118,9 +118,16 @@ def fill_form_with_data(first_name, surname, problem_diagnosis_name, clinical_de
 
 def convert_pdf_to_images(output_pdf_path):
 
-    images=convert_from_path(output_pdf_path,poppler_path=r"C:\Program Files (x86)\poppler-23.08.0\Library\bin")
+    images=convert_from_path(output_pdf_path, poppler_path=r"C:\Program Files (x86)\poppler-23.08.0\Library\bin")
     x=1
-    image1,image2=images
+    for image in images:
+        img_name=f"image_{x}.jpeg"
+        image.save(img_name,"JPEG")
+        x+=1
+
+    image1=Image.open("image_1.jpeg")
+    image2=Image.open("image_2.jpeg")
+
     cola,colb,colc=st.columns([4,.25,4])
     with cola:
         st.image(image1, caption='First page', use_column_width=True)
