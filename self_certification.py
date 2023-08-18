@@ -7,16 +7,13 @@ import data_dictionary
 import fillpdf
 from fillpdf import fillpdfs
 
-import base64
-from pathlib import Path
+import numpy as np
+from PIL import Image
+from pdf2image import convert_from_path 
 
 
 #----------------------------------------------------------------------------------------------------------------
 
-# This function turns the "done_button" state_session to True (Take a look on st.state_session if you are not familiar with it)
-def callback():
-    #Button was clicked!
-    st.session_state.done_button= True
 
 #----------------------------------------------------------------------------------------------------------------
 
@@ -79,17 +76,10 @@ def self_certif():
 
             fillpdfs.write_fillable_pdf(input_pdf_path, output_pdf_path, field_values,flatten=True)
 
+            convert_pdf_to_images(output_pdf_path)
+
             with open(output_pdf_path, "rb") as file:
                 pdf_contents = file.read()
-            
-            # Display the PDF content
-            st.write("PDF Preview:")
-            pdf_path = Path(output_pdf_path)
-            base64_pdf = base64.b64encode(pdf_path.read_bytes()).decode("utf-8")
-            pdf_display = f"""
-                <iframe src="data:application/pdf;base64,{base64_pdf}" width="800px" height="2100px" type="application/pdf"></iframe>
-            """
-            st.markdown(pdf_display, unsafe_allow_html=True)
 
             col1, col2, col3 = st.columns([4,2,3])
             with col2:
@@ -111,6 +101,28 @@ def self_certif():
     else:
         st.warning(": Waiting for both: demographic & clinical data",icon="⚠️")
 
+
+#---------------------------------------------------------------------------------------------------------------
+
+def convert_pdf_to_images(output_pdf_path):
+
+    images=convert_from_path(output_pdf_path,poppler_path=r"C:\Program Files (x86)\poppler-23.08.0\Library\bin")
+    x=1
+    image1,image2=images
+    cola,colb,colc=st.columns([4,.25,4])
+    with cola:
+        st.image(image1, caption='First page', use_column_width=True)
+    
+    with colc:
+        st.image(image2, caption='Second page', use_column_width=True)
+
+    for image in images:
+        image.save('output'+str(x)+".png","PNG")
+        x=x+1
+    
+
+
+    return()
 
 #---------------------------------------------------------------------------------------------------------------
 
