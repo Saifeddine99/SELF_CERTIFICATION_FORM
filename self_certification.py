@@ -4,14 +4,20 @@ import json
 import os
 import data_dictionary
 
-import fillpdf
-from fillpdf import fillpdfs
+import base64
+
+from typing import Literal
 
 import numpy as np
 from PIL import Image
+from pdf2jpg import pdf2jpg
+
+import fillpdf
+from fillpdf import fillpdfs
+
+from common1.utils import create_tmp_sub_folder, try_remove
+
 from pdf2image import convert_from_path 
-
-
 #----------------------------------------------------------------------------------------------------------------
 
 
@@ -76,7 +82,8 @@ def self_certif():
 
             fillpdfs.write_fillable_pdf(input_pdf_path, output_pdf_path, field_values,flatten=True)
 
-            convert_pdf_to_images(output_pdf_path)
+            #convert_pdf_to_images(output_pdf_path)
+            conv_pdf_to_img(output_pdf_path)
 
             with open(output_pdf_path, "rb") as file:
                 pdf_contents = file.read()
@@ -116,6 +123,41 @@ def fill_form_with_data(first_name, surname, problem_diagnosis_name, clinical_de
 
 #---------------------------------------------------------------------------------------------------------------
 
+FOOTER_ROWS = 300
+WHITE_VALUE = 255
+
+def crop_white_space(arr: np.array) -> np.array:
+    white_pixels = (arr == WHITE_VALUE)
+    white_rows = list(np.all(white_pixels, axis=(1, 2)))
+    last_non_white_row_idx = max(loc for loc, val in enumerate(white_rows) if not val)
+    merged_arr = arr[:last_non_white_row_idx + FOOTER_ROWS]
+    return merged_arr
+
+#---------------------------------------------------------------------------------------------------------------
+
+def conv_pdf_to_img(path_pdf):
+    tmp_sub_folder_path = create_tmp_sub_folder()
+
+    # Save images in that sub-folder
+    result = pdf2jpg.convert_pdf2jpg(path_pdf, tmp_sub_folder_path, pages="ALL")
+    images = []
+    for image_path in result[0]["output_jpgfiles"]:
+        images.append(np.array(Image.open(image_path)))
+    
+    st.write(len(result[0]["output_jpgfiles"]))
+    
+    # Create merged image from all images + remove irrelevant whitespace
+    merged_arr = np.concatenate(images)
+    merged_arr = crop_white_space(merged_arr)
+    merged_path = os.path.join(tmp_sub_folder_path, "merged.jpeg")
+    Image.fromarray(merged_arr).save(merged_path)
+
+    # Display the image
+    st.image(merged_path)
+    try_remove(tmp_sub_folder_path)
+
+#-------------------------------------------------------------------------------------------------------------
+
 def convert_pdf_to_images(output_pdf_path):
 
     images=convert_from_path(output_pdf_path, poppler_path=r"C:\Program Files (x86)\poppler-23.08.0\Library\bin")
@@ -134,7 +176,7 @@ def convert_pdf_to_images(output_pdf_path):
     
     with colc:
         st.image(image2, caption='Second page', use_column_width=True)
-
+    
     st.write("#")
 #---------------------------------------------------------------------------------------------------------------
 
