@@ -144,7 +144,7 @@ def conv_pdf_to_img(path_pdf):
     for image_path in result[0]["output_jpgfiles"]:
         images.append(np.array(Image.open(image_path)))
     
-    st.write(len(result[0]["output_jpgfiles"]))
+    st.write(result[0])
     
     # Create merged image from all images + remove irrelevant whitespace
     merged_arr = np.concatenate(images)
