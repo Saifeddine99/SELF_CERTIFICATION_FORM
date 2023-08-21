@@ -82,8 +82,8 @@ def self_certif():
 
             fillpdfs.write_fillable_pdf(input_pdf_path, output_pdf_path, field_values,flatten=True)
 
-            #convert_pdf_to_images(output_pdf_path)
-            conv_pdf_to_img(output_pdf_path)
+            convert_pdf_to_images(output_pdf_path)
+            #mean conv_pdf_to_img(output_pdf_path)
 
             with open(output_pdf_path, "rb") as file:
                 pdf_contents = file.read()
