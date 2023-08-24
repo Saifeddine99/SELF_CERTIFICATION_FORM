@@ -84,7 +84,7 @@ def demographic():
         st.write("#")
     with col_c:
         #Getting Clock Payroll number:
-        st.subheader("Clock Payroll N°:")
+        st.subheader("Payroll N°:")
         clock_payroll=st.number_input(":egrh",min_value=0,max_value=99999999999999,step=1,label_visibility ="collapsed")
         if (clock_payroll==0):
             st.warning(": You entered nothing!" ,icon="⚠️")
