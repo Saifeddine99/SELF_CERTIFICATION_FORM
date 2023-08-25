@@ -70,9 +70,9 @@ def self_certif():
             output_pdf_path ='filled_form_flattened.pdf'
 
             fillpdfs.write_fillable_pdf(input_pdf_path, non_flattened_pdf, field_values,flatten=False)
-
             fillpdfs.flatten_pdf(non_flattened_pdf, output_pdf_path)
-            convert_pdf_to_images(output_pdf_path)
+
+            #convert_pdf_to_images(output_pdf_path)
 
             with open(output_pdf_path, "rb") as file:
                 pdf_contents = file.read()
@@ -85,6 +85,7 @@ def self_certif():
             with col2:
                 
                 #This is a download button that allows to download the created new treatment file 
+                st.write("#")
                 download_button = st.download_button('Download', data=pdf_contents, file_name="filled_form_flattened.pdf")
             
             if (download_button):
@@ -216,16 +217,12 @@ def fill_form_with_data(phone_number,country_code,first_name,surname,title,birth
 
     #printing the phone number
     data["Phone number"]='+'+str(country_code)+str(phone_number)
-
-    
-
-    
-        
+       
     return(data)
 
 #-------------------------------------------------------------------------------------------------------------
 
-def convert_pdf_to_images(output_pdf_path):
+"""def convert_pdf_to_images(output_pdf_path):
     from pdf2image import convert_from_path 
     images=convert_from_path(output_pdf_path, poppler_path=r"C:\Program Files (x86)\poppler-23.08.0\Library\bin")
     x=1
@@ -244,7 +241,8 @@ def convert_pdf_to_images(output_pdf_path):
     with colc:
         st.image(image2, caption='Second page', use_column_width=True)
     
-    st.write("#")
+    st.write("#")"""
+
 #---------------------------------------------------------------------------------------------------------------
 
 def clinical_data_extractor(json_object_clinical_data):
